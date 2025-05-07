@@ -1,0 +1,531 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "send-zns",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        20,
+        0
+      ],
+      "id": "6627ab2a-c059-45bc-910c-511c2724548e",
+      "name": "Webhook",
+      "webhookId": "53fa75b5-0385-47b1-9a51-5599c7e2076b"
+    },
+    {
+      "parameters": {
+        "amount": "={{ $json.delay }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        300,
+        240
+      ],
+      "id": "3dd3d21f-da65-41c7-9f58-8d8cd295df9b",
+      "name": "Wait",
+      "webhookId": "8c469f3e-37ff-436f-b4fa-4f90d6f6a649"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://business.openapi.zalo.me/message/template",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "access_token",
+              "value": "={{ $json.ACT }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $json.phone }}\",\n  \"template_id\": \"{{ $json.templateId }}\",\n  \"template_data\": {{ JSON.stringify($json.template_data) }},\n  \"tracking_id\": \"{{ $json.phone }}-{{ $json.time }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        240
+      ],
+      "id": "240a7989-e409-4cc3-b0b9-0a9a962337ae",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "=https://zns-api.coregy.com.vn/api/V1/campaigns/{{ $('Wait').item.json.campaignId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('HTTP Request2').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        240
+      ],
+      "id": "a650d110-022f-4edd-abca-31fd3e445a40",
+      "name": "HTTP Request1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = items[0].json.body;\nconst templateId = input.templateId;\nconst timeSendList = input.timeSend;\n\nconst formatter = new Intl.DateTimeFormat(\"vi-VN\", {\n  timeZone: \"Asia/Ho_Chi_Minh\",\n  hour: \"2-digit\",\n  minute: \"2-digit\",\n  day: \"2-digit\",\n  month: \"2-digit\",\n  year: \"numeric\",\n  hour12: false,\n});\n\n\nconst results = timeSendList.map((timeStr) => {\n  const sendTime = new Date(timeStr); // vẫn là UTC\n\n  return {\n    json: {\n      templateId,\n      sendAt: sendTime.getTime(), // timestamp UTC\n      readableTime: formatter.format(sendTime), // giờ VN thật,\n      listPhone: $input.first().json.body.listPhone,\n      username: $input.first().json.body.username,\n      password: $input.first().json.body.password,\n      campaignId: $input.first().json.body.campaignId\n    },\n  };\n});\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        20,
+        240
+      ],
+      "id": "638202af-ae58-46b9-a5fd-971d3fc195e0",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://zns-api.coregy.com.vn/api/V1/auth/login",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "username",
+              "value": "={{ $json.username }}"
+            },
+            {
+              "name": "password",
+              "value": "={{ $json.password }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        580,
+        0
+      ],
+      "id": "150cac29-4712-4a36-a549-e3b540ef231f",
+      "name": "HTTP Request2",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "url": "https://zns-api.coregy.com.vn/api/V1/admin/me",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('HTTP Request2').item.json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        0
+      ],
+      "id": "fd455745-e599-4fcd-b156-0379641ea90d",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0d7f7a42-4a74-4e47-9965-2389fbecaedd",
+              "leftValue": "={{ $('HTTP Request1').item.json.isActive }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        240
+      ],
+      "id": "e01a2e8a-3537-4c5f-abb1-18bed73ca8c1",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const listPhone = $('Wait').first().json.listPhone;\n\nreturn listPhone.map((entry) => ({\n  json: {\n    templateId: $('HTTP Request1').first().json.templateId,\n    time: $('Code3').first().json.readableTime,\n    phone: entry.phone,\n    template_data: entry.metadata || {},\n    ACT: $input.first().json.ACT\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        0
+      ],
+      "id": "8295d8e3-773a-478c-9bf5-b79c76c7847c",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "38f13036-b7e0-49b6-841a-3d3ae732f0d5",
+      "name": "SplitInBatches",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        1100,
+        240
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {},
+      "id": "e506de37-1d04-49a4-9d35-dad87e949449",
+      "name": "Loop Back1",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1900,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const nowUTC = Date.now(); // dùng UTC chuẩn, không cộng thêm\n\nreturn items.map(item => {\n  const sendAt = Number(item.json.sendAt); // cũng là UTC timestamp\n  const delayMs = sendAt - nowUTC;\n  const delaySec = Math.max(Math.floor(delayMs / 1000), 0); // không bị âm\n\n  return {\n    json: {\n      ...item.json,\n      delay: delaySec,\n      username: $('Webhook').first().json.body.username,\n      password: $('Webhook').first().json.body.password,\n      campaignId: $('Webhook').first().json.body.campaignId\n    },\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        300,
+        0
+      ],
+      "id": "c1267460-ed6a-4de7-a21f-4748af70fcbc",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "718c69bf-0fe5-4ad7-a981-f3a03682b59d",
+              "leftValue": "={{ Object.keys($json).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        0
+      ],
+      "id": "3005084f-7bb9-4dbe-a794-b78fc5e5e308",
+      "name": "If1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://zns-api.coregy.com.vn/api/V1/campaigns/{{ $('HTTP Request1').item.json.schedules[0].campaignId }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer  {{ $('HTTP Request2').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=phone",
+              "value": "={{ $('If1').item.json.phone }}"
+            },
+            {
+              "name": "=scheduleId",
+              "value": "={{ $('HTTP Request1').item.json.recipients[1].campaignId }}"
+            },
+            {
+              "name": "=status",
+              "value": "={{$json.error === 0 ? 'SUCCESS' : 'FAILED'}}"
+            },
+            {
+              "name": "=errorMessage",
+              "value": "={{$json.error !== 0 ? $json.message : 'None'}}"
+            },
+            {
+              "name": "response",
+              "value": "={{ JSON.stringify($json) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        240
+      ],
+      "id": "e40a21c4-2b95-438c-93a3-eb4ee7de24a4",
+      "name": "HTTP Request4"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://zns-api.coregy.com.vn/api/V1/campaigns/{{ $('Wait').item.json.campaignId }}/update-status",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('HTTP Request2').item.json.access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "status",
+              "value": "SENT"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1620,
+        -120
+      ],
+      "id": "bdfd4a1e-0bb4-47d4-b982-b109ca940ca4",
+      "name": "HTTP Request5"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SplitInBatches": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Back1": {
+      "main": [
+        [
+          {
+            "node": "SplitInBatches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request4": {
+      "main": [
+        [
+          {
+            "node": "Loop Back1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afa706addb29272a2a65f9480c2b06c049c888f7cd36af9e195cc3d130f83850"
+  }
+}

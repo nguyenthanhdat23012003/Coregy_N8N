@@ -1,0 +1,278 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get-template-preview",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -320,
+        360
+      ],
+      "id": "7335e03c-89c3-4212-874d-9b3f0f3dc85f",
+      "name": "Webhook",
+      "webhookId": "88dfc0fc-b7bf-4201-bcfc-3b7fe9641b48"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.link }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        -140,
+        360
+      ],
+      "id": "7d3d2347-2534-44ea-8941-0b4343ec2276",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "html",
+              "cssSelector": "#preview-content",
+              "returnValue": "html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1,
+      "position": [
+        340,
+        260
+      ],
+      "id": "36500f40-8d60-40dd-ba92-b398bdd61268",
+      "name": "HTML - Main Content"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "dataPropertyName": "html",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "style",
+              "cssSelector": "link",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1,
+      "position": [
+        340,
+        460
+      ],
+      "id": "13a8350e-632d-4291-9625-592372dd07b3",
+      "name": "HTML - Styles"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      html: items[0].json.data\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        360
+      ],
+      "id": "f838f5d4-a94d-4f91-b84f-76e0d41b8aa9",
+      "name": "Code1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        580,
+        360
+      ],
+      "id": "d321a428-1818-4008-8e83-6256ef6c14d1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inputs = $input.all();\nlet html = \"\";\nlet styles = [];\n\nfor (const item of inputs) {\n  if (item.json.html) {\n    html = item.json.html;\n  }\n  if (item.json.style) {\n    styles = item.json.style;\n  }\n}\n\nreturn [\n  {\n    json: {\n      html,\n      styles\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        360
+      ],
+      "id": "fb546ac1-4328-4a70-9890-40498670338c",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allStyles = items[0].json.styles || [];\n\nconst cssUrls = allStyles.filter((url) =>\n  typeof url === \"string\" && url.trim().toLowerCase().endsWith(\"layout.css\")\n);\n\nreturn cssUrls.map((url) => ({\n  json: { url }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        360
+      ],
+      "id": "b233a816-d5f9-4142-afe7-63b894978f4d",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        360
+      ],
+      "id": "15b03916-6c3f-46c6-bff0-f0004feed1cd",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      html: $items(\"HTML - Main Content\", 0)[0].json.html,\n      styles: $items(\"HTTP Request1\").map((item) => item.json.data)\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        360
+      ],
+      "id": "2987931f-80a2-41e8-b5f4-022acd2a36b5",
+      "name": "Code3"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML - Main Content": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML - Styles": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTML - Main Content",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTML - Styles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "afa706addb29272a2a65f9480c2b06c049c888f7cd36af9e195cc3d130f83850"
+  }
+}

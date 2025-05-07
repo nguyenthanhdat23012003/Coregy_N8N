@@ -1,0 +1,1236 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.message.text }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/112.0.0.0 Safari/537.36\",\n  \"Accept\": \"text/html\",\n  \"Accept-Language\": \"en-US,en;q=0.9\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -120,
+        -280
+      ],
+      "id": "a3dafea5-c9b2-45d7-8ffe-7b77b5213362",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const domain = items[0].json.domain.replace(/\\/$/, ''); // Bỏ dấu / ở cuối nếu có\nconst links = items[1].json.links;\n\nif (!Array.isArray(links)) {\n  return [{ json: { error: 'Links is not an array' } }];\n}\n\n// Bắt đầu xử lý\nconst filtered = links\n  .filter(link => typeof link === 'string' && link.startsWith('/')) // chỉ lấy link bắt đầu bằng \"/\"\n  .map(link => link.split('?')[0]) // bỏ query string\n  .filter((value, index, self) => self.indexOf(value) === index) // lọc trùng\n  .filter(link => !['/following', '/followers', '/about', '/'].includes(link)); // bỏ mấy path thừa\n\n// Gắn domain vào để thành link đầy đủ\nconst result = filtered.map(path => ({\n  json: {\n    url: domain + path\n  }\n}));\n\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        420,
+        0
+      ],
+      "id": "342de868-8261-4315-b0dd-d0900c2c1af3",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "links",
+              "cssSelector": "a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        -160
+      ],
+      "id": "92a0adea-932d-40a5-833c-2fbd25fed2ec",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Link Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Link": "={{ $json.url }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "About",
+              "displayName": "About",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Posted",
+              "displayName": "Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link Facebook",
+              "displayName": "Link Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link LinkedIn",
+              "displayName": "Link LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "a4d8e104-36f8-4987-80fe-1bdfaf076f26",
+      "name": "Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kQ1MtxNNrD3YWYz8",
+          "name": "Nguyen Thanh Dat GG Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "domain",
+              "cssSelector": "meta[property=\"og:url\"]",
+              "returnValue": "attribute",
+              "attribute": "content"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        200,
+        -400
+      ],
+      "id": "b51a3646-4d66-46a3-bb6e-a53b45811e23",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        -280
+      ],
+      "id": "e0e34c36-9657-422c-bccd-351dcc7ad95e",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -440,
+        220
+      ],
+      "id": "425f79da-bcd3-4e52-a845-c105ca9aad4a",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Link Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI/edit#gid=0"
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -440,
+        480
+      ],
+      "id": "1c4ab585-9acf-4804-b614-80296b7ed115",
+      "name": "Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kQ1MtxNNrD3YWYz8",
+          "name": "Nguyen Thanh Dat GG Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy tất cả dữ liệu từ đầu vào\nconst rows = $input.all();\n\n// Tìm tất cả các đối tượng có trường \"Posted\" rỗng\nconst result = rows.filter(item => item.json.Posted === \"\");\n\n// Trả về đối tượng đầu tiên nếu có, nếu không trả về mảng rỗng\nreturn result.length > 0 ? [result[0]] : [];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        220
+      ],
+      "id": "a5d6f3cd-dbbb-4c99-b140-cd136b131f86",
+      "name": "Code1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -600,
+        -80
+      ],
+      "id": "24e3aa12-6580-4dae-8000-61fe7a4898f7",
+      "name": "Telegram Trigger",
+      "webhookId": "12d0ab54-32dd-4c23-9b12-284a9bbae8de",
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "48ae4730-80c5-4f9a-8303-01566b91ab05",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "https",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -400,
+        -80
+      ],
+      "id": "7b2c1220-897a-4d1a-8c8f-f7bd8b1bc5f9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.from.id }}",
+        "text": "=Please Input A Valid Link",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -120,
+        0
+      ],
+      "id": "f3c60dbc-3795-47fa-9df2-d3e3d5bb6ba9",
+      "name": "Telegram2",
+      "webhookId": "1bbc3c7b-dd93-4c18-8090-ef1e1421d80c",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "={{ $json.message }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1280,
+        0
+      ],
+      "id": "b670df52-77c2-48d3-9185-d60052068083",
+      "name": "Telegram3",
+      "webhookId": "1bbc3c7b-dd93-4c18-8090-ef1e1421d80c",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn [{\n  json: {\n    message: `Append ${items.length} link blog to list successfully ✅`\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        -280
+      ],
+      "id": "7fdd2be6-2d0e-4d6d-874f-8c01f0298078",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.Link }}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "{\n  \"User-Agent\": \"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/112.0.0.0 Safari/537.36\",\n  \"Accept\": \"text/html\",\n  \"Accept-Language\": \"en-US,en;q=0.9\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        220
+      ],
+      "id": "c683ebe2-a596-4d75-9172-b87ccebd0979",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "content",
+              "cssSelector": "#root",
+              "returnValue": "html"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        40,
+        480
+      ],
+      "id": "b95155e7-809f-4931-910f-4a0730025a02",
+      "name": "HTML2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional content marketer helping summarize technical blog posts for social media.\n\nYour task is to generate a post based on the following content.\n\nInput blog content:\n{{ $json.plainText }}\n\nFormat the output post as follows:\n\n1. Start with the line: [Technology Insight]\n\n2. Then, write the English version with this structure:\n   - 🚀 Start with a short and engaging opening (a hook) to capture attention.\n   - ✨ Follow with a clear and informative summary of the blog post. Include 2–3 relevant emojis (e.g. 🧠, 📊, 🔍, 💡).\n   - 🔗 End with this sentence: “Read the full blog here 👉 {{ $('Code1').item.json.Link }}”\n\nImportant Rules:\n- Do not include section titles like “Hook” or “Summary” in the final output.\n- Add a total of 3-4 emojis spread across English sections.\n- After the [Technology Insight] line is a blank line, then the next content\n- Avoid using markdown like `**` or `#`.\n- Keep a friendly, helpful, and engaging tone.\n- Use line breaks for readability.\n\nReturn only the final formatted post.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        560,
+        220
+      ],
+      "id": "00f00cc1-75e9-4c62-92ba-98069b190d41",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "google/gemini-2.0-flash-thinking-exp-1219:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        560,
+        480
+      ],
+      "id": "1f527442-3af1-43c1-81fb-26b93cd0eba8",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "I7ljM9q3nLpkJ5LP",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $json.content;\n\n// Dùng DOMParser từ JSDOM trong môi trường n8n để lấy text từ HTML\nconst strippedText = content.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi, '') // Xoá <script> tag\n                            .replace(/<style[^>]*>([\\s\\S]*?)<\\/style>/gi, '')  // Xoá <style> tag\n                            .replace(/<\\/?[^>]+(>|$)/g, '')                    // Xoá toàn bộ thẻ HTML\n                            .replace(/\\s+/g, ' ')                              // Dọn khoảng trắng\n                            .trim();                                          // Trim đầu cuối\n\nreturn [{ json: { plainText: strippedText } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        220
+      ],
+      "id": "79ba874f-5591-4d74-bbf7-ca263199280c",
+      "name": "Code3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "83f713e1-7ec9-4572-8693-50f4b9a8ecdd",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        720,
+        480
+      ],
+      "id": "2f92ed47-1582-4de7-a171-84368fc42525",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v22.0",
+        "node": "me",
+        "edge": "feed",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "message",
+                "value": "={{ $json.output }}"
+              },
+              {
+                "name": "link",
+                "value": "={{ $('Code1').item.json.Link }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        980,
+        220
+      ],
+      "id": "e6b7d7a0-34f6-4181-a0ee-f0876a0608e7",
+      "name": "Facebook Graph API",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "yiJok94NFFS4wnej",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Link Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Posted": "1",
+            "Link": "={{ $('Code1').item.json.Link }}",
+            "Link Facebook": "=https://facebook.com/{{ $('Facebook Graph API').item.json.id }}",
+            "Link LinkedIn": "=https://www.linkedin.com/feed/update/{{ $json.urn }}"
+          },
+          "matchingColumns": [
+            "Link"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link",
+              "displayName": "Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "About",
+              "displayName": "About",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Posted",
+              "displayName": "Posted",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Link Facebook",
+              "displayName": "Link Facebook",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Link LinkedIn",
+              "displayName": "Link LinkedIn",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1240,
+        220
+      ],
+      "id": "df370402-1ae4-4dfc-ad56-12d1ec2fcecd",
+      "name": "Google Sheets2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kQ1MtxNNrD3YWYz8",
+          "name": "Nguyen Thanh Dat GG Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8329445d-c19d-4750-bc44-8a0695af61a5",
+              "leftValue": "={{ $json.Link }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -180,
+        480
+      ],
+      "id": "0ffeed75-79f8-4706-8f3b-2a99e0332b1e",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "chatId": "7265317507",
+        "text": "List blog is empty! Please supplement by putting the blog list link here",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -180,
+        720
+      ],
+      "id": "a5b8c9d2-9cef-429b-b18c-dd4bda052944",
+      "name": "Telegram",
+      "webhookId": "ec4053ce-6869-4d1e-84ca-6a002a8f4b38",
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7265317507",
+        "text": "=Post blog successfully, see blog in [Facebook]({{ $json['Link Facebook'] }}) and [LinkedIn]({{ $json['Link LinkedIn'] }})",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1240,
+        480
+      ],
+      "id": "48c58734-b057-47a9-9370-ec2e392cbacc",
+      "name": "Telegram1",
+      "webhookId": "ec4053ce-6869-4d1e-84ca-6a002a8f4b38",
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "postAs": "organization",
+        "organization": "105963188",
+        "text": "={{ $('If1').item.json.output }}",
+        "shareMediaCategory": "ARTICLE",
+        "additionalFields": {
+          "originalUrl": "={{ $('If2').item.json.Link }}"
+        }
+      },
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        980,
+        480
+      ],
+      "id": "6c7fcc6c-d96f-494c-9d3e-090bc7ef70b9",
+      "name": "LinkedIn",
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "5cUjcO4YnPTJxz6M",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7265317507",
+        "text": "Error When Using LLM, Please Check",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        280,
+        480
+      ],
+      "id": "fce71d4c-997f-4d1c-8fc5-453f05927c96",
+      "name": "Telegram4",
+      "webhookId": "ec4053ce-6869-4d1e-84ca-6a002a8f4b38",
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Link Blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1o7LiLNXSDjmMXM47-9ldVOCrC5f-kskX_EJUiRM7IYI/edit#gid=0"
+        },
+        "options": {
+          "outputFormatting": {
+            "values": {
+              "general": "UNFORMATTED_VALUE",
+              "date": "FORMATTED_STRING"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        660,
+        -280
+      ],
+      "id": "b9b12d4b-9190-409e-b156-ef59f11b9095",
+      "name": "Google Sheets3",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "kQ1MtxNNrD3YWYz8",
+          "name": "Nguyen Thanh Dat GG Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lấy toàn bộ input từ Google Sheets (chứa các link đã tồn tại)\nconst existingLinks = $input.all().map(item => item.json.Link?.trim()).filter(link => !!link);\n\n// Lấy danh sách URL mới từ node 'Code' chứa mảng `url`\nconst newUrls = $('Code').all().map(item => item.json.url?.trim()).filter(url => !!url);\n\n// Chuyển thành Set để so sánh nhanh\nconst existingSet = new Set(existingLinks);\n\n// Lọc những URL chưa tồn tại\nconst uniqueUrls = newUrls.filter(url => !existingSet.has(url));\n\n// Trả về theo định dạng n8n\nreturn uniqueUrls.map(url => ({ json: { url } }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "b3d57f32-33b2-4dbd-8f23-bcd6b95e60e5",
+      "name": "Code4",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bdfe2929-531f-4c15-b236-b57d866fbb5b",
+              "leftValue": "={{ $json.isEmpty() }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        860,
+        -160
+      ],
+      "id": "e076c330-7f41-4168-99b1-66dad60db035",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').first().json.message.from.id }}",
+        "text": "No New Blog List To Add!",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        -280
+      ],
+      "id": "ba9b3563-0094-4e8a-8352-bd61c36709c7",
+      "name": "Telegram5",
+      "webhookId": "1bbc3c7b-dd93-4c18-8090-ef1e1421d80c",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "G7sl8zfmucU9MC5j",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram2": {
+      "main": [
+        []
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML2": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LinkedIn": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets3": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Telegram5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "afa706addb29272a2a65f9480c2b06c049c888f7cd36af9e195cc3d130f83850"
+  }
+}
