@@ -9,10 +9,10 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [
-        20,
-        0
+        -1880,
+        -100
       ],
-      "id": "6627ab2a-c059-45bc-910c-511c2724548e",
+      "id": "a12019fe-f9ed-4a0a-91b8-5759673c2c5c",
       "name": "Webhook",
       "webhookId": "53fa75b5-0385-47b1-9a51-5599c7e2076b"
     },
@@ -23,10 +23,10 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        300,
-        240
+        -1600,
+        140
       ],
-      "id": "3dd3d21f-da65-41c7-9f58-8d8cd295df9b",
+      "id": "62fac0b9-586c-4122-8f7d-08a5d6c98a38",
       "name": "Wait",
       "webhookId": "8c469f3e-37ff-436f-b4fa-4f90d6f6a649"
     },
@@ -55,10 +55,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1360,
-        240
+        -540,
+        140
       ],
-      "id": "240a7989-e409-4cc3-b0b9-0a9a962337ae",
+      "id": "464126f2-23ca-4590-b260-19a34467c797",
       "name": "HTTP Request"
     },
     {
@@ -78,10 +78,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        580,
-        240
+        -1320,
+        140
       ],
-      "id": "a650d110-022f-4edd-abca-31fd3e445a40",
+      "id": "80250067-88bb-43cc-9f3a-2b7ebf713cef",
       "name": "HTTP Request1",
       "executeOnce": true
     },
@@ -92,10 +92,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        20,
-        240
+        -1880,
+        140
       ],
-      "id": "638202af-ae58-46b9-a5fd-971d3fc195e0",
+      "id": "8bfa686e-1681-4707-9022-e604cf978fe6",
       "name": "Code"
     },
     {
@@ -120,10 +120,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        580,
-        0
+        -1320,
+        -100
       ],
-      "id": "150cac29-4712-4a36-a549-e3b540ef231f",
+      "id": "461e32e1-d461-4f01-ba01-d3e58ac0e01f",
       "name": "HTTP Request2",
       "executeOnce": true
     },
@@ -144,10 +144,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        840,
-        0
+        -1060,
+        -100
       ],
-      "id": "fd455745-e599-4fcd-b156-0379641ea90d",
+      "id": "75a34acf-7e97-4a0e-b0be-364f724f0f66",
       "name": "HTTP Request3"
     },
     {
@@ -178,10 +178,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        840,
-        240
+        -1060,
+        140
       ],
-      "id": "e01a2e8a-3537-4c5f-abb1-18bed73ca8c1",
+      "id": "1a38f8d6-79ed-46b1-9b3c-2200bc4eb957",
       "name": "If"
     },
     {
@@ -191,10 +191,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1100,
-        0
+        -800,
+        -100
       ],
-      "id": "8295d8e3-773a-478c-9bf5-b79c76c7847c",
+      "id": "1d3fc1d5-4f5f-4f99-988c-66c8e087614b",
       "name": "Code1"
     },
     {
@@ -204,26 +204,26 @@
           "reset": false
         }
       },
-      "id": "38f13036-b7e0-49b6-841a-3d3ae732f0d5",
+      "id": "62687395-d271-4049-b7bf-abd63d83e5bb",
       "name": "SplitInBatches",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 1,
       "position": [
-        1100,
-        240
+        -800,
+        140
       ],
       "alwaysOutputData": true,
       "executeOnce": false
     },
     {
       "parameters": {},
-      "id": "e506de37-1d04-49a4-9d35-dad87e949449",
+      "id": "a7a83b48-9e2b-409d-b4e8-8dd526de3237",
       "name": "Loop Back1",
       "type": "n8n-nodes-base.noOp",
       "typeVersion": 1,
       "position": [
-        1900,
-        240
+        0,
+        140
       ]
     },
     {
@@ -233,10 +233,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        300,
-        0
+        -1600,
+        -100
       ],
-      "id": "c1267460-ed6a-4de7-a21f-4748af70fcbc",
+      "id": "5c819719-489f-4780-93c6-97ad23747290",
       "name": "Code3"
     },
     {
@@ -266,10 +266,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1360,
-        0
+        -540,
+        -100
       ],
-      "id": "3005084f-7bb9-4dbe-a794-b78fc5e5e308",
+      "id": "7152e3b9-0e7d-4d67-80c0-54a5a13e6f00",
       "name": "If1",
       "alwaysOutputData": false
     },
@@ -299,7 +299,7 @@
             },
             {
               "name": "=scheduleId",
-              "value": "={{ $('HTTP Request1').item.json.recipients[1].campaignId }}"
+              "value": "={{ $('HTTP Request1').item.json.schedules[0].id }}"
             },
             {
               "name": "=status",
@@ -320,10 +320,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1620,
-        240
+        -280,
+        140
       ],
-      "id": "e40a21c4-2b95-438c-93a3-eb4ee7de24a4",
+      "id": "469dc98b-9a7d-43d7-bc0b-d3b4112d88ab",
       "name": "HTTP Request4"
     },
     {
@@ -353,10 +353,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1620,
-        -120
+        -280,
+        -220
       ],
-      "id": "bdfd4a1e-0bb4-47d4-b982-b109ca940ca4",
+      "id": "427f40f4-b299-43d9-b3f9-7d178488eac3",
       "name": "HTTP Request5"
     }
   ],
@@ -525,7 +525,6 @@
   },
   "pinData": {},
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "afa706addb29272a2a65f9480c2b06c049c888f7cd36af9e195cc3d130f83850"
+    "instanceId": "b3b06258fd848d11bca54b55749ae060cf2880ed4318d6969a3442d4729a477c"
   }
 }
